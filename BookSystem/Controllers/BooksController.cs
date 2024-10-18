@@ -33,11 +33,13 @@ namespace BookSystem.Controllers
 
             if (newBook.Genres != null && newBook.Genres.Any())
             {
+                var genresToAdd = new List<Genre>();
+
                 foreach (var genre in newBook.Genres)
                 {
-                    // Check if the genre already exists in the database
+                    // Case-insensitive comparison by converting both to lowercase
                     var existingGenre = await _context.Genres
-                        .FirstOrDefaultAsync(g => g.Name.Equals(genre.Name, StringComparison.OrdinalIgnoreCase));
+                        .FirstOrDefaultAsync(g => g.Name.ToLower() == genre.Name.ToLower());
 
                     if (existingGenre == null)
                     {
@@ -46,9 +48,12 @@ namespace BookSystem.Controllers
                         _context.Genres.Add(existingGenre);
                     }
 
-                    // Add the genre to the book's genres collection
-                    newBook.Genres.Add(existingGenre);
+                    // Add the genre to the temporary list to avoid modifying the collection during iteration
+                    genresToAdd.Add(existingGenre);
                 }
+
+                // Now add the collected genres to the newBook's Genres collection after iteration
+                newBook.Genres = genresToAdd;
             }
 
             // Add the new book to the database
@@ -57,6 +62,7 @@ namespace BookSystem.Controllers
 
             return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
         }
+
 
 
         // GET: api/books/{id}
@@ -71,6 +77,59 @@ namespace BookSystem.Controllers
 
             return Ok(book);
         }
+        [HttpPost("with image")]
+        public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
+        {
+            if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
+            {
+                return BadRequest("Cover image is required.");
+            }
+
+            var book = new Book
+            {
+                BookTitle = createBookDto.BookTitle,
+                BookPages = createBookDto.BookPages,
+                BookSummary = createBookDto.BookSummary,
+                // Additional properties as needed
+            };
+
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await createBookDto.CoverImage.CopyToAsync(memoryStream);
+                    book.CoverImage = memoryStream.ToArray();
+                }
+
+                _context.Books.Add(book);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("genre/{genre}")]
+        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByGenre(string genre)
+        {
+            var genreLower = genre.ToLower(); // Convert the input genre to lowercase
+
+            var books = await _context.Books
+                .Where(b => b.Genres.Any(g => g.Name.ToLower() == genreLower)) // Use lowercase for comparison
+                .ToListAsync();
+
+            if (books == null || !books.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(books);
+        }
+
+
 
         // PUT: api/books/{id}
         [HttpPut("{id}")]

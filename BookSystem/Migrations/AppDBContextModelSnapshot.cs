@@ -54,10 +54,9 @@ namespace BookSystem.Migrations
 
                     b.Property<string>("BookTitle")
                         .IsRequired()
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<byte[]>("CoverImage")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.HasKey("Id");
@@ -75,7 +74,7 @@ namespace BookSystem.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

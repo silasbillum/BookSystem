@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookSystem.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241017082857_Added_GenreDTO")]
-    partial class Added_GenreDTO
+    [Migration("20241018070605_Classes")]
+    partial class Classes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,7 @@ namespace BookSystem.Migrations
                         .HasColumnType("text");
 
                     b.Property<byte[]>("CoverImage")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.HasKey("Id");

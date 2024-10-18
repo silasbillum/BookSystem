@@ -2,33 +2,77 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management</title>
+    <style>
+        /* Simple CSS for better layout */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .book {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        img {
+            max-width: 100px;
+            max-height: 150px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
 
-Welcome to your new app.
-<form action="/api/books/1/uploadCoverImage" method="post" enctype="multipart/form-data">
-    <input type="file" name="coverImage" />
-    <button type="submit">Upload Image</button>
-</form>
+    <h1>Welcome to Your Book App!</h1>
 
-<img id="bookCover" alt="Book Cover" />
+    <h2>All Books</h2>
+    <div id="bookList"></div>
 
-<script>
-    fetch('/api/books/1/coverImage')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && data.imageSrc) {
-                document.getElementById('bookCover').src = data.imageSrc;
-            } else {
-                console.error('No image data found');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching image:', error);
-        });
+    <script>
+        // Function to fetch all books
+        function fetchBooks() {
+            fetch('/api/books')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(books => {
+                    const bookListDiv = document.getElementById('bookList');
+                    bookListDiv.innerHTML = ''; // Clear existing content
 
-</script>
+                    // Create book elements
+                    books.forEach(book => {
+                        const bookDiv = document.createElement('div');
+                        bookDiv.className = 'book';
+                        bookDiv.innerHTML = `
+                                    <img src="${book.coverImage ? `data:image/jpeg;base64,${book.coverImage}` : 'placeholder.jpg'}" alt="${book.bookTitle} Cover" />
+                                    <div>
+                                        <h3>${book.bookTitle}</h3>
+                                        <p><strong>Pages:</strong> ${book.bookPages}</p>
+                                        <p><strong>Summary:</strong> ${book.bookSummary}</p>
+                                    </div>
+                                `;
+                        bookListDiv.appendChild(bookDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching books:', error);
+                });
+        }
+
+        // Fetch books on page load
+        window.onload = fetchBooks;
+    </script>
+
+</body>
+</html>
+
