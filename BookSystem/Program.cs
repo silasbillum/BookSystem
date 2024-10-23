@@ -3,6 +3,7 @@ using BookSystem.Context;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MudBlazor.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,9 +23,17 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.MaxDepth = 64; // Adjust depth if needed
 });
+builder.Services.AddHttpClient("YourApiClient", client =>
+{
+client.BaseAddress = new Uri("https://localhost:7219/"); // Set to your API's base URL
+});
 
 
 
+builder.Services.AddMudServices();
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
