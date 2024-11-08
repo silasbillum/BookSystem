@@ -1,154 +1,184 @@
 ﻿@page "/AddNewBook"
-
+@inject IJSRuntime JS
 @using DomainModels
-@using MudBlazor
+
 @using System.Runtime.CompilerServices
+
 @inject HttpClient _httpClient
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <title>Add Book Form</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+        /* Centering and Container Styling */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Card Styling */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        /* Label and Input Styling */
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+            input:focus, textarea:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+
+        .helper-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+            }
+    </style>
 </head>
 <body>
 
-    <MudLayout>
-    <MudPopoverProvider />
+    <div class="main-content">
+        <div class="container">
+            <div class="card">
+                <form onsubmit="postBookToDB(event)">
+                    <div class="form-group">
+                        <label for="BookTitle">Book Title</label>
+                        <input type="text" id="BookTitle" name="BookTitle" required>
+                        <div class="helper-text">(Required) Enter the book title</div>
+                    </div>
 
-    <MudAppBar>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                    <div class="form-group">
+                        <label for="bookPages">Number of Pages</label>
+                        <input type="text" id="bookPages" name="bookPages" required>
+                        <div class="helper-text">(Required) Enter the number of pages</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bookSummary">Summary</label>
+                        <textarea id="bookSummary" name="bookSummary" rows="4"></textarea>
+                        <div class="helper-text">(Optional) Enter a summary</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bookGenre">Genre</label>
+                        <input type="text" id="bookGenre" name="bookGenre" required>
+                        <div class="helper-text">(Required) Genre</div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" onclick="postBookToDB(event)">Add Book</button>
+                </form>
+            </div>
         </div>
-    </MudAppBar>
-
-    <MudDrawer Open="true" Anchor="Anchor.Left" Variant="DrawerVariant.Mini" >
-        <NavMenu />  <!-- Your sidebar content -->
-    </MudDrawer>
-
-    <MudMainContent>
-        <div class="main-content">
-            <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-                <MudCard Outlined="true">
-                    <MudCardContent>
-                        <MudTextField @bind-Value="book.BookTitle" Label="(Required) Book Title" HelperText="(Required) Enter the book title" Variant="Variant.Outlined" />
-                        <MudTextField @bind-Value="book.BookPages" Label="(Required) Number of Pages" HelperText="(Required) Enter the number of pages" Variant="Variant.Outlined" />
-                        <MudTextField @bind-Value="book.BookSummary" Label="(Optional) Book Summary" HelperText="(Optional) Enter a summary" Variant="Variant.Outlined" />
-
-                        <!-- Select genre from predefined options -->
-                        <MudSelect T="string" Label="Select Genre" @bind-Value="selectedGenre">
-                            @if (predefinedGenres.Any())
-                            {
-                                @foreach (var genre in predefinedGenres)
-                                {
-                                    <MudSelectItem T="string" Value="@genre">@genre</MudSelectItem>
-                                        <MudSelectItem T="string" Value="@("standard single")">standard single</MudSelectItem>
-                                        <MudSelectItem T="string" Value="@("standard double")">standard double</MudSelectItem>
-                                }
-                            }
-                            else
-                            {
-                                <MudSelectItem T="string">Loading genres...</MudSelectItem>
-                            }
-                        </MudSelect>
-
-                        <InputFile OnChange="HandleImageUpload" />
-                        @if (imagePreview != null)
-                        {
-                            <img src="@imagePreview" alt="Image Preview" width="200" />
-                        }
-                    </MudCardContent>
-
-                    <MudCardActions>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="PostBookToDB">Add Book</MudButton>
-                    </MudCardActions>
-                </MudCard>
-            </MudContainer>
-        </div>
-    </MudMainContent>
-
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
     </div>
-</MudLayout>
 
-<style>
-   
+    <script>
+        async function postBookToDB(event) {
+            event.preventDefault();
 
-    /* Main content area */
-    .main-content {
-        display: flex;
-        justify-content: flex-end; /* Aligns content to the right */
-        padding: 20px; /* Adds some padding to the main content area */
-        width: 400px;
-        margin: 200px;
-    }
+            // Gather form data
+            const BookTitle = document.getElementById('BookTitle').value;
+            const BookPages = document.getElementById('BookPages').value;
+            const BookSummary = document.getElementById('BookSummary').value;
+            const Genres = document.getElementById("Genres").value;
 
-    .mud-popover {
-        z-index: 1100 !important; /* Ensure the dropdown is above other elements */
-    }
-</style>
+            // Create a book object to send
+            const bookData = {
+                BookTitle: bookTitle,
+                BookPages: bookPages,
+                BookSummary: bookSummary,
+                genres: bookGenre
+            };
+
+            try {
+                // Send data to the server using the fetch API
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'  // Sending JSON format
+                    },
+                    body: JSON.stringify(bookData)  // Convert bookData to JSON
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Book added successfully!');
+                    console.log("Response from server:", result);
+
+                    // Optionally, reset the form
+                    document.getElementById('bookTitle').value = '';
+                    document.getElementById('bookPages').value = '';
+                    document.getElementById('bookSummary').value = '';
+                } else {
+                    const errorText = await response.json();
+                    console.log('Response Error Details:', errorText);  // Log error details
+                    alert('Error adding book: ' + JSON.stringify(errorText));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to the server');
+            }
+        }
+
+
+    </script>
+
 </body>
 </html>
-@code {
-    Book book = new Book();
-    private string selectedGenre; // Store the selected genre
-    private List<string> predefinedGenres = new List<string>(); // Predefined genres
-    private byte[] uploadedImage; // Store uploaded image
-    private string imagePreview; // For displaying image preview
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Simulate loading genres (you can fetch these from your API if needed)
-       
-        predefinedGenres = new List<string> { "Fiction", "Adventure", "Fantasy" };
-    }
 
-    private async Task HandleImageUpload(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        using var memoryStream = new MemoryStream();
-        await file.OpenReadStream().CopyToAsync(memoryStream);
-        uploadedImage = memoryStream.ToArray();
-
-        // Show image preview
-        imagePreview = $"data:image/jpeg;base64,{Convert.ToBase64String(uploadedImage)}";
-    }
-
-    private async Task PostBookToDB()
-    {
-        // Ensure the selected genre is added to the book object
-        book.Genres = new List<Genre> { new Genre { Name = selectedGenre } };
-        book.CoverImage = uploadedImage; // Add uploaded image to the book object
-
-        // Post the book to your API
-        var response = await _httpClient.PostAsJsonAsync("api/books", book);
-
-        if (response.IsSuccessStatusCode)
-        {
-            // Handle success (e.g., show a success message, reset form)
-            Console.WriteLine("Book added successfully.");
-            ResetForm();
-        }
-        else
-        {
-            // Handle error
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Console.Error.WriteLine($"Error adding book: {errorMessage}");
-        }
-    }
-
-    private void ResetForm()
-    {
-        // Optionally reset the form fields
-        book = new Book();
-        selectedGenre = null;
-        imagePreview = null;
-        uploadedImage = null;
-    }
-}
