@@ -1,56 +1,23 @@
 ﻿@inherits LayoutComponentBase
-@using MudBlazor
 
-<MudLayout>
-    <MudPopoverProvider />
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
 
-    <!-- AppBar -->
-    <MudAppBar>
+    <main>
         <div class="top-row px-4">
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
-    </MudAppBar>
 
-    <!-- Sidebar Drawer -->
-    <MudDrawer Open="true" Anchor="Anchor.Left" Elevation="1" Variant="DrawerVariant.Mini" class="sidebar">
-        <NavMenu />
-    </MudDrawer>
-
-    <!-- Main Content Area -->
-    <MudMainContent>
-        <div class="content px-4">
+        <article class="content px-4">
             @Body
-        </div>
-    </MudMainContent>
+        </article>
+    </main>
+</div>
 
-    <!-- Error UI -->
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>
-</MudLayout>
-
-<style>
-    /* Sidebar: Assign a fixed width and background color for the sidebar */
-    .mud-drawer.sidebar {
-        width: 250px !important; /* Width of the sidebar */
-        background-color: gray; /* Sidebar background color */
-        position: fixed; /* Fixes the sidebar in place */
-        top: 64px; /* Adjust this based on the height of the AppBar */
-        height: 100vh; /* Make the sidebar span the full viewport height */
-        z-index: 1000; /* Keeps the sidebar above the main content */
-    }
-
-    /* Main Content: Ensure it respects the sidebar's width */
-    .mud-main-content {
-        margin-left: 250px; /* This pushes the main content to the right of the sidebar */
-        padding: 16px;
-        box-sizing: border-box;
-    }
-
-    /* Optional body styling */
-    body {
-        font-family: "Segoe UI", sans-serif;
-    }
-</style>
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
