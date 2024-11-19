@@ -12,8 +12,7 @@ namespace BookSystem.DomainModels
         public string BookPages { get; set; } // Maps to 'varchar' in PostgreSQL
         
         public string BookSummary { get; set; } // Maps to 'text' in PostgreSQL
-        public IFormFile CoverImage { get; set; } // For the cover image file
-
+        
         public ICollection<Genre> Genres { get; set; } = new List<Genre>(); // Initialize the collection
     }
 

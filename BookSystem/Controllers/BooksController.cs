@@ -80,21 +80,20 @@ namespace BookSystem.Controllers
             return Ok(book);
         }
         [HttpPost("with-image")]
-        public async Task<IActionResult> CreateBooks([FromForm] Book Book)
+        public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
         {
             // Validate that a file was uploaded
-            if (Book.CoverImage == null || Book.CoverImage.Length == 0)
+            if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
             {
                 return BadRequest("Cover image is required.");
             }
 
             var book = new Book
             {
-                BookTitle = Book.BookTitle,
-                BookPages = Book.BookPages,
-                BookSummary = Book.BookSummary,
-                Genres = _context.Genres.Where(g => Book.Genres.Contains(g)).ToList(),
-                CoverImage = Book.CoverImage,
+                BookTitle = createBookDto.BookTitle,
+                BookPages = createBookDto.BookPages,
+                BookSummary = createBookDto.BookSummary,
+                Genres = _context.Genres.Where(g => createBookDto.Genres.Contains(g)).ToList()
             };
 
             try
@@ -102,7 +101,7 @@ namespace BookSystem.Controllers
                 // Convert the uploaded image to a byte array
                 using (var memoryStream = new MemoryStream())
                 {
-                    await Book.CoverImage.CopyToAsync(memoryStream);
+                    await createBookDto.CoverImage.CopyToAsync(memoryStream);
                     //book.CoverImage = memoryStream.ToArray();
                 }
 
@@ -157,7 +156,7 @@ namespace BookSystem.Controllers
             book.BookTitle = updatedBook.BookTitle;
             book.BookPages = updatedBook.BookPages;
             book.BookSummary = updatedBook.BookSummary;
-           //book.CoverImage = updatedBook.CoverImage; // Update cover image if provided
+           // book.CoverImage = updatedBook.CoverImage; // Update cover image if provided
             book.Genres = updatedBook.Genres; // Update genres
 
             await _context.SaveChangesAsync();
