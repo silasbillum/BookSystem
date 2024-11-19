@@ -1,5 +1,4 @@
-﻿@inject NavigationManager NavigationManager
-<div class="top-row ps-3 navbar navbar-dark">
+﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BookSystem</a>
     </div>
@@ -10,24 +9,18 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <!-- Use fully qualified namespace to avoid conflicts -->
-            <Microsoft.AspNetCore.Components.Routing.NavLink class="nav-link" href="/SavedBooks" Match="NavLinkMatch.All" >
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-               
-            </Microsoft.AspNetCore.Components.Routing.NavLink>
+            </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <Microsoft.AspNetCore.Components.Routing.NavLink class="nav-link" href="AddNewBook">
+            <NavLink class="nav-link" href="AddNewBook">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add new book
-            </Microsoft.AspNetCore.Components.Routing.NavLink>
+            </NavLink>
         </div>
-        <div class="nav-item px-3">
-            
-                
-            
-        </div>
+
+        
     </nav>
 </div>
-
 

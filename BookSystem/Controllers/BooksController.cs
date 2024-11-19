@@ -63,8 +63,6 @@ namespace BookSystem.Controllers
             return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
         }
 
-      
-
 
 
         // GET: api/books/{id}
@@ -79,10 +77,9 @@ namespace BookSystem.Controllers
 
             return Ok(book);
         }
-        [HttpPost("with-image")]
+        [HttpPost("with image")]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
         {
-            // Validate that a file was uploaded
             if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
             {
                 return BadRequest("Cover image is required.");
@@ -93,19 +90,17 @@ namespace BookSystem.Controllers
                 BookTitle = createBookDto.BookTitle,
                 BookPages = createBookDto.BookPages,
                 BookSummary = createBookDto.BookSummary,
-                Genres = _context.Genres.Where(g => createBookDto.Genres.Contains(g)).ToList()
+                // Additional properties as needed
             };
 
             try
             {
-                // Convert the uploaded image to a byte array
                 using (var memoryStream = new MemoryStream())
                 {
                     await createBookDto.CoverImage.CopyToAsync(memoryStream);
-                    //book.CoverImage = memoryStream.ToArray();
+                    book.CoverImage = memoryStream.ToArray();
                 }
 
-                // Save the book with the image in the database
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
 
@@ -116,7 +111,6 @@ namespace BookSystem.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
 
         [HttpGet("genre/{genre}")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksByGenre(string genre)
@@ -156,58 +150,58 @@ namespace BookSystem.Controllers
             book.BookTitle = updatedBook.BookTitle;
             book.BookPages = updatedBook.BookPages;
             book.BookSummary = updatedBook.BookSummary;
-           // book.CoverImage = updatedBook.CoverImage; // Update cover image if provided
+            book.CoverImage = updatedBook.CoverImage; // Update cover image if provided
             book.Genres = updatedBook.Genres; // Update genres
 
             await _context.SaveChangesAsync();
             return NoContent(); // Indicate that the update was successful
         }
 
-        //[HttpPost("{id}/uploadCoverImage")]
-        //public async Task<IActionResult> UploadCoverImage(int id, IFormFile coverImage)
-        //{
-        //    if (coverImage == null || coverImage.Length == 0)
-        //    {
-        //        return BadRequest("No file provided.");
-        //    }
+        [HttpPost("{id}/uploadCoverImage")]
+        public async Task<IActionResult> UploadCoverImage(int id, IFormFile coverImage)
+        {
+            if (coverImage == null || coverImage.Length == 0)
+            {
+                return BadRequest("No file provided.");
+            }
 
-        //    var book = await _context.Books.FindAsync(id);
-        //    if (book == null)
-        //    {
-        //        return NotFound("Book not found.");
-        //    }
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound("Book not found.");
+            }
 
-        //    try
-        //    {
-        //        using (var memoryStream = new MemoryStream())
-        //        {
-        //            await coverImage.CopyToAsync(memoryStream);
-        //            book.CoverImage = memoryStream.ToArray();
-        //        }
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await coverImage.CopyToAsync(memoryStream);
+                    book.CoverImage = memoryStream.ToArray();
+                }
 
-        //        await _context.SaveChangesAsync();
-        //        return Ok("Cover image uploaded successfully.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
+                await _context.SaveChangesAsync();
+                return Ok("Cover image uploaded successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
-        //[HttpGet("{id}/coverImage")]
-        //public async Task<IActionResult> GetCoverImage(int id)
-        //{
-        //    var book = await _context.Books.FindAsync(id);
-        //    if (book == null || book.CoverImage == null)
-        //    {
-        //        return NotFound("Image not found.");
-        //    }
+        [HttpGet("{id}/coverImage")]
+        public async Task<IActionResult> GetCoverImage(int id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book == null || book.CoverImage == null)
+            {
+                return NotFound("Image not found.");
+            }
 
-        //    var base64Image = Convert.ToBase64String(book.CoverImage);
-        //    var imgSrc = $"data:image/jpeg;base64,{base64Image}"; // Adjust MIME type as needed
+            var base64Image = Convert.ToBase64String(book.CoverImage);
+            var imgSrc = $"data:image/jpeg;base64,{base64Image}"; // Adjust MIME type as needed
 
-        //    return Ok(new { ImageSrc = imgSrc });
-        //}
+            return Ok(new { ImageSrc = imgSrc });
+        }
 
         // GET: api/books
         [HttpGet]

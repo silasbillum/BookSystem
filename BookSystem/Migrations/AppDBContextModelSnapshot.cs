@@ -33,7 +33,7 @@ namespace BookSystem.Migrations
 
                     b.HasIndex("GenresId");
 
-                    b.ToTable("BookGenre", (string)null);
+                    b.ToTable("BookGenre");
                 });
 
             modelBuilder.Entity("BookSystem.DomainModels.Book", b =>
@@ -61,7 +61,7 @@ namespace BookSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Books", (string)null);
+                    b.ToTable("Books");
                 });
 
             modelBuilder.Entity("BookSystem.DomainModels.Genre", b =>
@@ -78,7 +78,7 @@ namespace BookSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("BookGenre", b =>

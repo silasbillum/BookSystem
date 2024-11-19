@@ -1,24 +1,27 @@
 ﻿@inherits LayoutComponentBase
-@using System.Threading
+@using MudBlazor
 
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudLayout>
+    <MudPopoverProvider />
 
-<div class="main-layout">
-
-
+    <!-- AppBar -->
+    <MudAppBar>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+    </MudAppBar>
 
     <!-- Sidebar Drawer -->
-    <aside class="sidebar">
+    <MudDrawer Open="true" Anchor="Anchor.Left" Elevation="1" Variant="DrawerVariant.Mini" class="sidebar">
         <NavMenu />
-    </aside>
+    </MudDrawer>
 
     <!-- Main Content Area -->
-    <main class="content px-4">
-        @Body
-    </main>
+    <MudMainContent>
+        <div class="content px-4">
+            @Body
+        </div>
+    </MudMainContent>
 
     <!-- Error UI -->
     <div id="blazor-error-ui">
@@ -26,58 +29,28 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-</div>
-
+</MudLayout>
 
 <style>
-    /* Basic styling for the layout */
-    .main-layout {
-        display: grid;
-        grid-template-areas:
-            "app-bar app-bar"
-            "sidebar content";
-        grid-template-rows: auto 1fr;
-        grid-template-columns: 240px 1fr;
-        height: 100vh;
+    /* Sidebar: Assign a fixed width and background color for the sidebar */
+    .mud-drawer.sidebar {
+        width: 250px !important; /* Width of the sidebar */
+        background-color: gray; /* Sidebar background color */
+        position: fixed; /* Fixes the sidebar in place */
+        top: 64px; /* Adjust this based on the height of the AppBar */
+        height: 100vh; /* Make the sidebar span the full viewport height */
+        z-index: 1000; /* Keeps the sidebar above the main content */
     }
 
-    .app-bar {
-        grid-area: app-bar;
-        background-color: #333;
-        color: white;
-        padding: 10px;
+    /* Main Content: Ensure it respects the sidebar's width */
+    .mud-main-content {
+        margin-left: 250px; /* This pushes the main content to the right of the sidebar */
+        padding: 16px;
+        box-sizing: border-box;
     }
 
-    .sidebar {
-        grid-area: sidebar;
-        background-color: #f8f9fa;
-        padding: 10px;
-        border-right: 1px solid #ddd;
-    }
-
-    .content {
-        grid-area: content;
-        padding: 20px;
-        overflow-y: auto;
-    }
-
-    /* Error UI Styling */
-    #blazor-error-ui {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .reload, .dismiss {
-        color: #007bff;
-        cursor: pointer;
-        text-decoration: underline;
+    /* Optional body styling */
+    body {
+        font-family: "Segoe UI", sans-serif;
     }
 </style>

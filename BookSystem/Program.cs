@@ -1,12 +1,10 @@
 using BookSystem.Components;
 using BookSystem.Context;
-using BookSystem.DomainModels;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MudBlazor.Services;
 using Scalar.AspNetCore;
-
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -29,9 +27,6 @@ builder.Services.AddHttpClient("YourApiClient", client =>
 {
 client.BaseAddress = new Uri("https://localhost:7219/"); // Set to your API's base URL
 });
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7219/SavedBooks") });
-
-
 
 
 
@@ -48,15 +43,6 @@ builder.Services.AddDbContext<AppDBContext>(options =>
 
 
 var app = builder.Build();
-//app.MapPost("/api/books", (Book book) =>
-//{
-//    // Handle the received book data
-//    Console.WriteLine($"Received book: {book.BookTitle}, Pages: {book.BookPages}, Summary: {book.BookSummary}");
-
-//    // Example response
-//    return Results.Ok();
-//});
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
