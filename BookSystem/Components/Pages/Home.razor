@@ -1,78 +1,134 @@
 ﻿@page "/"
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject IHttpClientFactory HttpClientFactory
+@using DomainModels
 
 <PageTitle>Home</PageTitle>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Management</title>
-    <style>
-        /* Simple CSS for better layout */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+<h1>Velkommen til din Bog App!</h1>
+
+<h2>Alle Bøger</h2>
+
+@if (books == null)
+{
+    <p>Indlæser...</p>
+}
+else
+{
+    <div class="book-list">
+        @foreach (var book in books)
+        {
+            <div class="book">
+                @if (book.CoverImage != null)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(book.CoverImage)" 
+                         alt="@book.BookTitle"
+                         class="book-cover"
+                         @onerror="(e) => OnImageError(e)" />
+                }
+                else
+                {
+                    <div class="placeholder-cover">
+                        <span>Intet billede</span>
+                    </div>
+                }
+                <div class="book-details">
+                    <h3>@book.BookTitle</h3>
+                    <p><strong>Sider:</strong> @book.BookPages</p>
+                    <p><strong>Resumé:</strong> @book.BookSummary</p>
+                    <p><strong>Genrer:</strong> 
+                        @if (book.Genres != null && book.Genres.Any())
+                        {
+                            <span>@string.Join(", ", book.Genres.Select(g => g.Name))</span>
+                        }
+                        else
+                        {
+                            <span>Ingen genrer</span>
+                        }
+                    </p>
+                </div>
+            </div>
         }
-        .book {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
+    </div>
+}
+
+<style>
+    .book-list {
+        margin: 20px;
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .book {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        gap: 15px;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .book-cover {
+        width: 100px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .placeholder-cover {
+        width: 100px;
+        height: 150px;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: #666;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .book-details {
+        flex: 1;
+    }
+
+    .book-details h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .book-details p {
+        margin: 5px 0;
+    }
+
+    .book-details span {
+        color: #666;
+    }
+</style>
+
+@code {
+    private List<GetBookDTO> books;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient();
+            books = await client.GetFromJsonAsync<List<GetBookDTO>>("https://localhost:7219/api/books");
         }
-        img {
-            max-width: 100px;
-            max-height: 150px;
-            margin-right: 10px;
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fejl ved hentning af bøger: {ex.Message}");
         }
-    </style>
-</head>
-<body>
+    }
 
-    <h1>Welcome to Your Book App!</h1>
-
-    <h2>All Books</h2>
-    <div id="bookList"></div>
-
-    <script>
-        // Function to fetch all books
-        function fetchBooks() {
-            fetch('/api/books')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(books => {
-                    const bookListDiv = document.getElementById('bookList');
-                    bookListDiv.innerHTML = ''; // Clear existing content
-
-                    // Create book elements
-                    books.forEach(book => {
-                        const bookDiv = document.createElement('div');
-                        bookDiv.className = 'book';
-                        bookDiv.innerHTML = `
-                                    <img src="${book.coverImage ? `data:image/jpeg;base64,${book.coverImage}` : 'placeholder.jpg'}" alt="${book.bookTitle} Cover" />
-                                    <div>
-                                        <h3>${book.bookTitle}</h3>
-                                        <p><strong>Pages:</strong> ${book.bookPages}</p>
-                                        <p><strong>Summary:</strong> ${book.bookSummary}</p>
-                                    </div>
-                                `;
-                        bookListDiv.appendChild(bookDiv);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching books:', error);
-                });
-        }
-
-        // Fetch books on page load
-        window.onload = fetchBooks;
-    </script>
-
-</body>
-</html>
+    private void OnImageError(ErrorEventArgs e)
+    {
+        // Håndter billede fejl her hvis nødvendigt
+        Console.WriteLine("Billede kunne ikke indlæses");
+    }
+}
 

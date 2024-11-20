@@ -1,0 +1,135 @@
+@page "/create"
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Opret Ny Bog</PageTitle>
+
+<div class="create-container">
+    <h2>Opret Ny Bog</h2>
+    
+    <div class="create-form">
+        <div class="form-group mb-3">
+            <label for="title">Titel</label>
+            <input type="text" class="form-control" id="title" @bind="bookTitle" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="pages">Antal sider</label>
+            <input type="number" class="form-control" id="pages" @bind="bookPages" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="summary">Resumé</label>
+            <textarea class="form-control" id="summary" rows="3" @bind="bookSummary"></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="coverImage">Bogomslag</label>
+            <InputFile OnChange="@OnInputFileChange" class="form-control" accept="image/*" />
+        </div>
+        
+        @if (isLoading)
+        {
+            <div class="mt-3">
+                <p>Opretter bog...</p>
+            </div>
+        }
+        
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert @(isError ? "alert-danger" : "alert-success") mt-3">
+                @message
+            </div>
+        }
+        
+        <div class="mt-3">
+            <button class="btn btn-primary" @onclick="HandleCreateBook" disabled="@(isLoading || !hasFile)">
+                Opret Bog
+            </button>
+            <button class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/"))">
+                Tilbage
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .create-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+
+    .create-form {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+
+@code {
+    private string bookTitle = "";
+    private int bookPages;
+    private string bookSummary = "";
+    private IBrowserFile? selectedFile;
+    private bool isLoading;
+    private bool hasFile;
+    private string message = "";
+    private bool isError;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        hasFile = true;
+        message = "";
+    }
+    private async Task HandleCreateBook()
+    {
+        if (selectedFile == null) return;
+
+        isLoading = true;
+        message = "";
+        
+        try
+        {
+            var client = HttpClientFactory.CreateClient();
+            var content = new MultipartFormDataContent();
+            
+            // Tilføj bog data
+            content.Add(new StringContent(bookTitle), "BookTitle");
+            content.Add(new StringContent(bookPages.ToString()), "BookPages");
+            content.Add(new StringContent(bookSummary), "BookSummary");
+            
+            // Tilføj billede
+            var fileContent = new StreamContent(selectedFile.OpenReadStream(maxAllowedSize: 4096000)); // 4MB max
+            content.Add(fileContent, "CoverImage", selectedFile.Name);
+
+            var response = await client.PostAsync("https://localhost:7219/api/books/withimage🤳", content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                message = "Bog oprettet succesfuldt!";
+                isError = false;
+                await Task.Delay(2000); // Vent 2 sekunder
+                NavigationManager.NavigateTo("/"); // Naviger tilbage til forsiden
+            }
+            else
+            {
+                message = $"Fejl ved oprettelse: {await response.Content.ReadAsStringAsync()}";
+                isError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Der opstod en fejl: {ex.Message}";
+            isError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+} 
