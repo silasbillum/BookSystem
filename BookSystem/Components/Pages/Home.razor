@@ -1,6 +1,14 @@
 ﻿@page "/"
+
 @using DomainModels
 @inject IHttpClientFactory HttpClientfactory
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject IHttpClientFactory HttpClientFactory
+@using DomainModels
+
+
 
 
 <PageTitle>Books</PageTitle>
@@ -53,6 +61,133 @@ else
        
     }
     </div>
+}
+
+
+<h1>Velkommen til din Bog App!</h1>
+
+<h2>Alle Bøger</h2>
+
+@if (books == null)
+{
+    <p>Indlæser...</p>
+}
+else
+{
+    <div class="book-list">
+        @foreach (var book in books)
+        {
+            <div class="book">
+                @if (book.CoverImage != null)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(book.CoverImage)" 
+                         alt="@book.BookTitle"
+                         class="book-cover"
+                         @onerror="(e) => OnImageError(e)" />
+                }
+                else
+                {
+                    <div class="placeholder-cover">
+                        <span>Intet billede</span>
+                    </div>
+                }
+                <div class="book-details">
+                    <h3>@book.BookTitle</h3>
+                    <p><strong>Sider:</strong> @book.BookPages</p>
+                    <p><strong>Resumé:</strong> @book.BookSummary</p>
+                    <p><strong>Genrer:</strong> 
+                        @if (book.Genres != null && book.Genres.Any())
+                        {
+                            <span>@string.Join(", ", book.Genres.Select(g => g.Name))</span>
+                        }
+                        else
+                        {
+                            <span>Ingen genrer</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .book-list {
+        margin: 20px;
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .book {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        gap: 15px;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .book-cover {
+        width: 100px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .placeholder-cover {
+        width: 100px;
+        height: 150px;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: #666;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .book-details {
+        flex: 1;
+    }
+
+    .book-details h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .book-details p {
+        margin: 5px 0;
+    }
+
+    .book-details span {
+        color: #666;
+    }
+</style>
+
+@code {
+    private List<GetBookDTO> books;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient();
+            books = await client.GetFromJsonAsync<List<GetBookDTO>>("https://localhost:7219/api/books");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fejl ved hentning af bøger: {ex.Message}");
+        }
+    }
+
+    private void OnImageError(ErrorEventArgs e)
+    {
+        // Håndter billede fejl her hvis nødvendigt
+        Console.WriteLine("Billede kunne ikke indlæses");
+    }
 }
 
 

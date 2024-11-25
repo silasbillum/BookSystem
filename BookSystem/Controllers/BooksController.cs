@@ -1,13 +1,13 @@
-﻿using BookSystem.Context;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using BookSystem.Context;
 using BookSystem.DomainModels;
 using BookSystem.DomainModels; // Adjust this namespace according to your project structure
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BookSystem.Controllers
 {
@@ -38,8 +38,9 @@ namespace BookSystem.Controllers
                 foreach (var genre in newBook.Genres)
                 {
                     // Case-insensitive comparison by converting both to lowercase
-                    var existingGenre = await _context.Genres
-                        .FirstOrDefaultAsync(g => g.Name.ToLower() == genre.Name.ToLower());
+                    var existingGenre = await _context.Genres.FirstOrDefaultAsync(g =>
+                        g.Name.ToLower() == genre.Name.ToLower()
+                    );
 
                     if (existingGenre == null)
                     {
@@ -63,8 +64,6 @@ namespace BookSystem.Controllers
             return CreatedAtAction(nameof(GetBook), new { id = newBook.Id }, newBook);
         }
 
-
-
         // GET: api/books/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
@@ -77,7 +76,8 @@ namespace BookSystem.Controllers
 
             return Ok(book);
         }
-        [HttpPost("with image")]
+
+        [HttpPost("withimage🤳")]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
         {
             if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
@@ -117,8 +117,8 @@ namespace BookSystem.Controllers
         {
             var genreLower = genre.ToLower(); // Convert the input genre to lowercase
 
-            var books = await _context.Books
-                .Where(b => b.Genres.Any(g => g.Name.ToLower() == genreLower)) // Use lowercase for comparison
+            var books = await _context
+                .Books.Where(b => b.Genres.Any(g => g.Name.ToLower() == genreLower)) // Use lowercase for comparison
                 .ToListAsync();
 
             if (books == null || !books.Any())
@@ -128,8 +128,6 @@ namespace BookSystem.Controllers
 
             return Ok(books);
         }
-
-
 
         // PUT: api/books/{id}
         [HttpPut("{id}")]
@@ -222,4 +220,3 @@ namespace BookSystem.Controllers
         }
     }
 }
-
