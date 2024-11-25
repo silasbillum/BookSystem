@@ -22,5 +22,12 @@ namespace BookSystem.DomainModels
         public IFormFile CoverImage { get; set; } // For the cover image file
         // Additional properties as needed
     }
-
+    public class GetBookDTO
+    {
+        public string BookTitle { get; set; }
+        public string BookPages { get; set; }
+        public string BookSummary { get; set; }
+        public byte[]? CoverImage { get; set; }
+        public ICollection<GenreDTO> Genres { get; set; } = new List<GenreDTO>();
+    }
 }

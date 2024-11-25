@@ -205,10 +205,20 @@ namespace BookSystem.Controllers
 
         // GET: api/books
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
+        public async Task<ActionResult<IEnumerable<GetBookDTO>>> GetAllBooks()
         {
-            var books = await _context.Books.ToListAsync();
-            return Ok(books);
+            var books = await _context.Books.Include(b => b.Genres).ToListAsync();
+            var bookDTOs = books
+                .Select(b => new GetBookDTO
+                {
+                    BookTitle = b.BookTitle,
+                    BookPages = b.BookPages,
+                    BookSummary = b.BookSummary,
+                    CoverImage = b.CoverImage,
+                    Genres = b.Genres.Select(g => new GenreDTO { Name = g.Name }).ToList()
+                })
+                .ToList();
+            return Ok(bookDTOs);
         }
     }
 }
