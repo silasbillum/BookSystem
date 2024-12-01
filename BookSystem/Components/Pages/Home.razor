@@ -1,68 +1,11 @@
-﻿@page "/"
-
-@using DomainModels
-@inject IHttpClientFactory HttpClientfactory
-
+﻿﻿
+@page "/"
 @using System.Net.Http
 @using System.Net.Http.Json
 @inject IHttpClientFactory HttpClientFactory
 @using DomainModels
 
-
-
-
-<PageTitle>Books</PageTitle>
-
-<h1>Books</h1>
-
-@if(books == null)
-{
-    <p>Loading</p>
-}
-else
-{  
-      <div class="Cards">
-    @foreach(var book in books)
-    {
-      
-           
-
-          
-        
-    <div class="infoBox">
-
-            
-            @if (book.CoverImage != null)
-            {
-                <img src="data:image/jpeg;base64,@Convert.ToBase64String(book.CoverImage)"
-                     alt="@book.BookTitle"
-                     class="book-cover"
-                      />
-            }
-                <div class="book-details">
-
-                <p>Book Title: @book.BookTitle</p>
-                <p>Pages: @book.BookPages</p>
-                <p>Summary: @book.BookSummary</p>
-                <p>Genre:
-                        @if (book.Genres != null && book.Genres.Any())
-                        {
-                                        <span>@string.Join(", ", book.Genres.Select(g => g.Name))</span>
-                        }
-                        else
-                        {
-                                        <span>Ingen genrer</span>
-                        }
-                </p>
-                
-                </div>
-            
-        </div>
-       
-    }
-    </div>
-}
-
+<PageTitle>Home</PageTitle>
 
 <h1>Velkommen til din Bog App!</h1>
 
@@ -95,6 +38,7 @@ else
                     <h3>@book.BookTitle</h3>
                     <p><strong>Sider:</strong> @book.BookPages</p>
                     <p><strong>Resumé:</strong> @book.BookSummary</p>
+                    <p><strong>Book type:</strong> @book.BookType</p>
                     <p><strong>Genrer:</strong> 
                         @if (book.Genres != null && book.Genres.Any())
                         {
@@ -116,11 +60,11 @@ else
         margin: 20px;
         display: grid;
         gap: 20px;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
     }
 
     .book {
-        border: 1px solid #ccc;
+        border: 1px solid black;
         padding: 15px;
         border-radius: 8px;
         display: flex;
@@ -189,43 +133,3 @@ else
         Console.WriteLine("Billede kunne ikke indlæses");
     }
 }
-
-
-@code {
-    public List<Book> books;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var client = HttpClientfactory.CreateClient();
-        books = await client.GetFromJsonAsync<List<Book>>("https://booksystem-qyu8.onrender.com/api/Books");
-    }
-}
-
-<style>
-   
-   .Cards
-   {
-       
-        gap: 20px;
-       display:grid;
-       margin: 20px auto;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-   }
-   .infoBox
-   {
-       display:flex;
-       padding: 5px;
-        border: 1px solid; 
-        background-color: #DBE2EF; 
-        border-color: black;
-        border-radius: 5px;
-   }
-   .book-details{
-        flex: 1;
-   }
-   .book-cover{
-        width: 100px;
-        height: 150px;
-        object-fit: cover;
-   }
-</style>

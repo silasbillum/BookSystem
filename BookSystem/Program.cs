@@ -1,5 +1,6 @@
 using BookSystem.Components;
 using BookSystem.Context;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,8 @@ builder
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 var app = builder.Build();
 
@@ -43,12 +46,29 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 });
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        var error = context.Features.Get<IExceptionHandlerFeature>();
+        if (error != null)
+        {
+            await context.Response.WriteAsync($"Error: {error.Error.Message}");
+        }
+    });
+});
+app.UseCors(policy =>
+    policy.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader());
 
 app.MapScalarApiReference(options =>
 {
     options.WithDefaultHttpClient(ScalarTarget.C, ScalarClient.Libcurl).OpenApiRoutePattern =
         "/swagger/v1/swagger.json";
 });
+app.UseDeveloperExceptionPage(); // Add this in your Startup.cs Configure method for dev environment
 
 app.UseHttpsRedirection();
 

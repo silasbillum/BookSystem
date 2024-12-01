@@ -80,37 +80,60 @@ namespace BookSystem.Controllers
         [HttpPost("withimage🤳")]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
         {
-            if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
-            {
-                return BadRequest("Cover image is required.");
-            }
-
-            var book = new Book
-            {
-                BookTitle = createBookDto.BookTitle,
-                BookPages = createBookDto.BookPages,
-                BookSummary = createBookDto.BookSummary,
-                // Additional properties as needed
-            };
-
             try
             {
-                using (var memoryStream = new MemoryStream())
+                // Validate the cover image
+                if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
                 {
-                    await createBookDto.CoverImage.CopyToAsync(memoryStream);
-                    book.CoverImage = memoryStream.ToArray();
+                    return BadRequest("Cover image is required.");
                 }
 
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
+                // Create the Book entity
+                var book = new Book
+                {
+                    BookTitle = createBookDto.BookTitle,
+                    BookPages = createBookDto.BookPages,
+                    BookSummary = createBookDto.BookSummary,
+                    BookType = createBookDto.BookType,
+                    
+                    // Additional properties as needed
+                };
 
+                // Process the image and save it as binary data
+                try
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await createBookDto.CoverImage.CopyToAsync(memoryStream);
+                        book.CoverImage = memoryStream.ToArray();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Error processing the image: {ex.Message}");
+                }
+
+                // Save the book to the database
+                try
+                {
+                    _context.Books.Add(book);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Error saving the book to the database: {ex.Message}");
+                }
+
+                // Return success response
                 return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
             }
             catch (Exception ex)
             {
+                // Catch any unexpected errors
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpGet("genre/{genre}")]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooksByGenre(string genre)
@@ -213,6 +236,7 @@ namespace BookSystem.Controllers
                     BookPages = b.BookPages,
                     BookSummary = b.BookSummary,
                     CoverImage = b.CoverImage,
+                    BookType = b.BookType,
                     Genres = b.Genres.Select(g => new GenreDTO { Name = g.Name }).ToList()
                 })
                 .ToList();

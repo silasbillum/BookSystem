@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BookSystem.DomainModels
 {
@@ -6,11 +7,14 @@ namespace BookSystem.DomainModels
     {
         public int Id { get; set; } // Primary Key
         public string Name { get; set; } // Maps to 'varchar' in PostgreSQL
+
+        [JsonIgnore]
         public ICollection<Book> Books { get; set; } = new List<Book>(); // Initialize the collection
     }
 
     public class GenreDTO
     {
+
         public string Name { get; set; }
     }
 }
