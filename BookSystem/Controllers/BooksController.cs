@@ -77,16 +77,12 @@ namespace BookSystem.Controllers
             return Ok(book);
         }
 
-        [HttpPost("withimage🤳")]
+        [HttpPost("withimage")]
         public async Task<IActionResult> CreateBook([FromForm] CreateBookDto createBookDto)
         {
             try
             {
-                // Validate the cover image
-                if (createBookDto.CoverImage == null || createBookDto.CoverImage.Length == 0)
-                {
-                    return BadRequest("Cover image is required.");
-                }
+                
 
                 // Create the Book entity
                 var book = new Book
@@ -110,7 +106,9 @@ namespace BookSystem.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex);
                     return BadRequest($"Error processing the image: {ex.Message}");
+                    
                 }
 
                 // Save the book to the database
@@ -121,6 +119,8 @@ namespace BookSystem.Controllers
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex);
+
                     return StatusCode(500, $"Error saving the book to the database: {ex.Message}");
                 }
 
@@ -129,6 +129,7 @@ namespace BookSystem.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 // Catch any unexpected errors
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }

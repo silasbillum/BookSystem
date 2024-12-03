@@ -23,6 +23,7 @@ namespace BookSystem.DomainModels
         public string BookPages { get; set; }
         public string BookSummary { get; set; }
         public string BookType { get; set; }
+        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         public IFormFile CoverImage { get; set; } // For the cover image file
         // Additional properties as needed
     }
@@ -35,4 +36,5 @@ namespace BookSystem.DomainModels
         public string BookType { get; set; }
         public ICollection<GenreDTO> Genres { get; set; } = new List<GenreDTO>();
     }
+    
 }

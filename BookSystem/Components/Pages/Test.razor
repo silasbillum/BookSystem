@@ -1,11 +1,15 @@
 ﻿@page "/test"
+@rendermode InteractiveServer
 
 <h1>Test Button</h1>
-<button @onclick="Click" >Click</button>
+<button @onclick="ClickMe" >Click</button>
+<p> @clicked</p>
 
 @code {
-    private void Click()
+    public string clicked = "Not now";
+
+    private void ClickMe()
     {
-        Console.WriteLine("button clicked");
+        clicked = "Pressed";
     }
 }
