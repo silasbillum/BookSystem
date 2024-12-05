@@ -82,7 +82,11 @@ namespace BookSystem.Controllers
         {
             try
             {
-                
+                // Validate incoming data
+                if (createBookDto == null)
+                {
+                    return BadRequest("Book data is required.");
+                }
 
                 // Create the Book entity
                 var book = new Book
@@ -91,12 +95,10 @@ namespace BookSystem.Controllers
                     BookPages = createBookDto.BookPages,
                     BookSummary = createBookDto.BookSummary,
                     BookType = createBookDto.BookType,
-                    
-                    // Additional properties as needed
                 };
 
                 // Process the image and save it as binary data
-                try
+                if (createBookDto.CoverImage != null)
                 {
                     using (var memoryStream = new MemoryStream())
                     {
@@ -104,25 +106,45 @@ namespace BookSystem.Controllers
                         book.CoverImage = memoryStream.ToArray();
                     }
                 }
-                catch (Exception ex)
+
+                // Process genres if provided
+                if (createBookDto == null)
                 {
-                    Console.WriteLine(ex);
-                    return BadRequest($"Error processing the image: {ex.Message}");
-                    
+                    return BadRequest("Book data is required.");
                 }
+
+                if (createBookDto.Genres != null && createBookDto.Genres.Any())
+                {
+                    var genresToAdd = new List<Genre>();
+
+                    foreach (var genre in createBookDto.Genres)
+                    {
+                        // Case-insensitive comparison by converting both to lowercase
+                        var existingGenre = await _context.Genres.FirstOrDefaultAsync(g =>
+                            g.Name.ToLower() == genre.Name.ToLower()
+                        );
+
+                        if (existingGenre == null)
+                        {
+                            // If the genre does not exist, create a new one
+                            existingGenre = new Genre { Name = genre.Name };
+                            _context.Genres.Add(existingGenre);
+                        }
+
+                        // Add the genre to the temporary list to avoid modifying the collection during iteration
+                        genresToAdd.Add(existingGenre);
+                    }
+
+                    // Now add the collected genres to the newBook's Genres collection after iteration
+                    createBookDto.Genres = genresToAdd;
+                }
+
+               
+
 
                 // Save the book to the database
-                try
-                {
-                    _context.Books.Add(book);
-                    await _context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-
-                    return StatusCode(500, $"Error saving the book to the database: {ex.Message}");
-                }
+                _context.Books.Add(book);
+                await _context.SaveChangesAsync();
 
                 // Return success response
                 return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
@@ -134,6 +156,7 @@ namespace BookSystem.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
 
         [HttpGet("genre/{genre}")]

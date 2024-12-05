@@ -19,6 +19,7 @@ namespace BookSystem.DomainModels
 
     public class CreateBookDto
     {
+        
         public string BookTitle { get; set; }
         public string BookPages { get; set; }
         public string BookSummary { get; set; }
