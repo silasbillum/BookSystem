@@ -113,38 +113,36 @@ namespace BookSystem.Controllers
                     return BadRequest("Book data is required.");
                 }
 
-                if (createBookDto.Genres != null && createBookDto.Genres.Any())
-                {
-                    var genresToAdd = new List<Genre>();
-
-                    foreach (var genre in createBookDto.Genres)
-                    {
-                        // Case-insensitive comparison by converting both to lowercase
-                        var existingGenre = await _context.Genres.FirstOrDefaultAsync(g =>
-                            g.Name.ToLower() == genre.Name.ToLower()
-                        );
-
-                        if (existingGenre == null)
-                        {
-                            // If the genre does not exist, create a new one
-                            existingGenre = new Genre { Name = genre.Name };
-                            _context.Genres.Add(existingGenre);
-                        }
-
-                        // Add the genre to the temporary list to avoid modifying the collection during iteration
-                        genresToAdd.Add(existingGenre);
-                    }
-
-                    // Now add the collected genres to the newBook's Genres collection after iteration
-                    createBookDto.Genres = genresToAdd;
-                }
+               
 
                
 
 
-                // Save the book to the database
+               
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
+
+                if (createBookDto.Genres != null && createBookDto.Genres.Any())
+                {
+                    foreach (var genreId in createBookDto.Genres)
+                    {
+                       
+                        var genre = await _context.Genres.FindAsync(genreId);
+                        if (genre != null)
+                        {
+                            
+                            book.Genres.Add(genre);
+                        }
+                        else
+                        {
+                            
+                            return BadRequest($"genre with id {genreId} does not exist");
+                        }
+                    }
+
+                    // Save changes to the database after linking genres
+                    await _context.SaveChangesAsync();
+                }
 
                 // Return success response
                 return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);

@@ -24,7 +24,7 @@ namespace BookSystem.DomainModels
         public string BookPages { get; set; }
         public string BookSummary { get; set; }
         public string BookType { get; set; }
-        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        public ICollection<int> Genres { get; set; } = new List<int>();
         public IFormFile CoverImage { get; set; } // For the cover image file
         // Additional properties as needed
     }
