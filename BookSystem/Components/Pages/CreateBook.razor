@@ -4,6 +4,8 @@
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using DomainModels
 
 <PageTitle>Opret Ny Bog</PageTitle>
 
@@ -31,9 +33,49 @@
         </div>
         <div class="form-group mb-3">
             <label for="summary">Genre</label>
-            <input type="number" class="form-control" id="summary" rows="3" @bind="Genre" />
+           
             
+
         </div>
+
+        <div>
+            <label for="genreDropdown">Select Genre:</label>
+            <select id="genreDropdown" @bind="SelectedGenreId">
+                <option value="">-- Select a Genre --</option>
+                @if (Genres != null)
+                {
+                    @foreach (var genre in Genres)
+                    {
+                        <option value="@genre.Id">@genre.Name</option>
+                    }
+                }
+            </select>
+        </div>
+@*         <div class="form-group mb-3">
+    <label for="genre">Genre</label>
+    <select class="form-control" id="genre" @bind="Genre">
+                <option value="1">Fiction</option>
+                <option value="2">Fantasy</option>
+                <option value="3">Regression</option>
+                <option value="4">Action</option>
+                <option value="5">Adventure</option>
+                <option value="6">Drama</option>
+                <option value="7">Horror</option>
+                <option value="9">Thriller</option>
+                <option value="10">Villainess</option>
+                <option value="11">Murim</option>
+                <option value="12">Cultivation</option>
+                <option value="13">Gates</option>
+                <option value="14">Sports</option>
+                <option value="15">Slice of life</option>
+                <option value="16">Tower</option>
+                <option value="17">Magic</option>
+                <option value="18">Historical</option>
+                <option value="19">Reincarnation</option>
+                <option value="19">Reincarnation</option>
+      
+    </select>
+</div> *@
 
         <div class="form-group mb-3">
             <label for="coverImage">Bogomslag</label>
@@ -85,13 +127,22 @@
     private int bookPages;
     private string bookSummary = "";
     private string bookType = "";
-    private string Genre = "";
+    private string genre = "";
     private IBrowserFile? selectedFile;
     private bool isLoading;
     private bool hasFile;
     private string message = "";
     private bool isError;
+    private List<Genre> Genres { get; set; } = new();
+    private string SelectedGenreId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        // Call your API to fetch genres
+        Genres = await Http.GetFromJsonAsync<List<Genre>>("https://localhost:7219/api/genre");
+    }
 
+    // Genre model matching your database structure
+    
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
@@ -115,7 +166,7 @@
             content.Add(new StringContent(bookPages.ToString()), "BookPages");
             content.Add(new StringContent(bookSummary), "BookSummary");
             content.Add(new StringContent(bookType), "BookType");
-            content.Add(new StringContent(Genre), "Genres");
+            content.Add(new StringContent(genre), "Genres");
 
             // Tilføj billede
             var fileContent = new StreamContent(selectedFile.OpenReadStream(maxAllowedSize: 4096000)); // 4MB max

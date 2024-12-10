@@ -15,6 +15,7 @@ namespace BookSystem.DomainModels
     public class GenreDTO
     {
 
+        public int Id { get; set; } // Primary Key
         public string Name { get; set; }
     }
 }

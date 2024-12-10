@@ -18,10 +18,9 @@ namespace BookSystem.Controllers
 
         // GET: api/genres
         [HttpGet]
-        public async Task<IActionResult> GetGenres()
+        public async Task<ActionResult<List<Genre>>> GetGenresAsync()
         {
-            var genres = await _context.Genres.ToListAsync();
-            return Ok(genres);
+            return Ok(await _context.Genres.ToListAsync());
         }
 
         // GET: api/genres/{id}
