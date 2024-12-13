@@ -33,10 +33,9 @@
         </div>
         <div class="form-group mb-3">
             <label for="summary">Genre</label>
-           
-            
-
+              
         </div>
+        
 
         <div>
             <label for="genreDropdown">Select Genre:</label>
@@ -50,6 +49,31 @@
                     }
                 }
             </select>
+
+            <select class="form-multi-select" id="ms1" multiple data-coreui-search="global">
+                <option value="0">Angular</option>
+                <option value="1">Bootstrap</option>
+                <option value="2">React.js</option>
+                <option value="3">Vue.js</option>
+                <optgroup label="backend">
+                    <option value="4">Django</option>
+                    <option value="5">Laravel</option>
+                    <option value="6">Node.js</option>
+                </optgroup>
+            </select>
+         <form>
+                <select class="form-multi-select" id="ms1" multiple data-coreui-search="global">
+                    <option value="0">Angular</option>
+                    <option value="1">Bootstrap</option>
+                    <option value="2">React.js</option>
+                    <option value="3">Vue.js</option>
+                    <optgroup label="backend">
+                        <option value="4">Django</option>
+                        <option value="5">Laravel</option>
+                        <option value="6">Node.js</option>
+                    </optgroup>
+                </select>
+         </form>
         </div>
 @*         <div class="form-group mb-3">
     <label for="genre">Genre</label>
@@ -135,6 +159,9 @@
     private bool isError;
     private List<Genre> Genres { get; set; } = new();
     private string SelectedGenreId { get; set; }
+
+   
+
     protected override async Task OnInitializedAsync()
     {
         // Call your API to fetch genres
@@ -166,7 +193,7 @@
             content.Add(new StringContent(bookPages.ToString()), "BookPages");
             content.Add(new StringContent(bookSummary), "BookSummary");
             content.Add(new StringContent(bookType), "BookType");
-            content.Add(new StringContent(genre), "Genres");
+            content.Add(new StringContent(SelectedGenreId), "Genres");
 
             // Tilføj billede
             var fileContent = new StreamContent(selectedFile.OpenReadStream(maxAllowedSize: 4096000)); // 4MB max
